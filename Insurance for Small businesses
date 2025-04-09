@@ -1,0 +1,258 @@
+app.py (Backend)
+python
+Copy
+from flask import Flask, render_template, request, redirect, url_for
+
+app = Flask(__name__)
+
+# In-memory data (you can replace this with a database later)
+clients = []
+policies = []
+claims = []
+
+# Client routes
+@app.route('/clients')
+def clients_page():
+    return render_template('clients.html', clients=clients)
+
+@app.route('/add_client', methods=['POST'])
+def add_client():
+    name = request.form['name']
+    email = request.form['email']
+    clients.append({'name': name, 'email': email})
+    return redirect(url_for('clients_page'))
+
+# Policy routes
+@app.route('/policies')
+def policies_page():
+    return render_template('policies.html', policies=policies)
+
+@app.route('/add_policy', methods=['POST'])
+def add_policy():
+    client_name = request.form['client_name']
+    policy_type = request.form['policy_type']
+    premium = request.form['premium']
+    policies.append({'client_name': client_name, 'policy_type': policy_type, 'premium': premium})
+    return redirect(url_for('policies_page'))
+
+# Claims routes
+@app.route('/claims')
+def claims_page():
+    return render_template('claims.html', claims=claims)
+
+@app.route('/add_claim', methods=['POST'])
+def add_claim():
+    policy_id = request.form['policy_id']
+    claim_description = request.form['claim_description']
+    claims.append({'policy_id': policy_id, 'claim_description': claim_description})
+    return redirect(url_for('claims_page'))
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+if __name__ == "__main__":
+    app.run(debug=True)
+2. templates/index.html (Home Page)
+html
+Copy
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Insurance App</h1>
+        <nav>
+            <a href="{{ url_for('clients_page') }}">Clients</a>
+            <a href="{{ url_for('policies_page') }}">Policies</a>
+            <a href="{{ url_for('claims_page') }}">Claims</a>
+        </nav>
+    </header>
+    <section>
+        <h2>Overview</h2>
+        <p>Manage your insurance processes easily here!</p>
+    </section>
+</body>
+</html>
+3. templates/clients.html (Clients Page)
+html
+Copy
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clients</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Client List</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('policies_page') }}">Policies</a>
+            <a href="{{ url_for('claims_page') }}">Claims</a>
+        </nav>
+    </header>
+    <section>
+        <h2>Add New Client</h2>
+        <form action="{{ url_for('add_client') }}" method="POST">
+            <label for="name">Client Name:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="email">Client Email:</label>
+            <input type="email" id="email" name="email" required>
+            <button type="submit">Add Client</button>
+        </form>
+
+        <h2>Client List</h2>
+        <ul>
+            {% for client in clients %}
+                <li>{{ client['name'] }} - {{ client['email'] }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+</body>
+</html>
+4. templates/policies.html (Policies Page)
+html
+Copy
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policies</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Policy Management</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('clients_page') }}">Clients</a>
+            <a href="{{ url_for('claims_page') }}">Claims</a>
+        </nav>
+    </header>
+    <section>
+        <h2>Add New Policy</h2>
+        <form action="{{ url_for('add_policy') }}" method="POST">
+            <label for="client_name">Client Name:</label>
+            <input type="text" id="client_name" name="client_name" required>
+            <label for="policy_type">Policy Type:</label>
+            <input type="text" id="policy_type" name="policy_type" required>
+            <label for="premium">Premium Amount:</label>
+            <input type="number" id="premium" name="premium" required>
+            <button type="submit">Add Policy</button>
+        </form>
+
+        <h2>Policy List</h2>
+        <ul>
+            {% for policy in policies %}
+                <li>{{ policy['client_name'] }} - {{ policy['policy_type'] }} - {{ policy['premium'] }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+</body>
+</html>
+5. templates/claims.html (Claims Page)
+html
+Copy
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claims</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Claims Management</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('clients_page') }}">Clients</a>
+            <a href="{{ url_for('policies_page') }}">Policies</a>
+        </nav>
+    </header>
+    <section>
+        <h2>Add New Claim</h2>
+        <form action="{{ url_for('add_claim') }}" method="POST">
+            <label for="policy_id">Policy ID:</label>
+            <input type="text" id="policy_id" name="policy_id" required>
+            <label for="claim_description">Claim Description:</label>
+            <textarea id="claim_description" name="claim_description" required></textarea>
+            <button type="submit">Add Claim</button>
+        </form>
+
+        <h2>Claim List</h2>
+        <ul>
+            {% for claim in claims %}
+                <li>Policy ID: {{ claim['policy_id'] }} - Claim: {{ claim['claim_description'] }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+</body>
+</html>
+6. static/style.css (CSS)
+css
+Copy
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+}
+
+section {
+    padding: 20px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
