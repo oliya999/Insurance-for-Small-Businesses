@@ -1,0 +1,13 @@
+Step 2: Directory Structure
+cpp
+Copy
+insurance_app/
+│
+├── app.py
+├── templates/
+│   ├── index.html
+│   ├── clients.html
+│   ├── policies.html
+│   ├── claims.html
+└── static/
+    └── style.css
